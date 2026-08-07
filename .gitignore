@@ -1,0 +1,9 @@
+*.env
+*.prepared
+*.backup
+*.bak
+*.log
+*.vbs
+.DS_Store
+Thumbs.db
+mirror/_tmp/
