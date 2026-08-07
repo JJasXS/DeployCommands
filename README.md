@@ -8,8 +8,6 @@ Double-click Windows deploy scripts for ProAcc projects. Each app folder has:
 | `deploy-*-gitlab.cmd` | Clones from `https://gitlabsvr.oneclickclouds.com/softwaredevelopment/<repo>.git` |
 | `validate-env.ps1` | Must sit next to the `.cmd` (Notepad `.env` gate) |
 
-Also: `mirror\push-github-to-gitlab.cmd` mirrors GitHub → GitLab.
-
 ## How to run
 
 1. Double-click the `.cmd` (do **not** paste into PowerShell).
@@ -31,11 +29,19 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 
 ## Mirror GitHub → GitLab
 
+One folder per project under `mirror\`:
+
 ```text
-mirror\push-github-to-gitlab.cmd
+mirror\ProAccScanner\push-github-to-gitlab.cmd
+mirror\autoEmailing\push-github-to-gitlab.cmd
+mirror\ABS_System\push-github-to-gitlab.cmd
+mirror\eQuotation\push-github-to-gitlab.cmd
+mirror\ApprovalPO\push-github-to-gitlab.cmd
+mirror\push-all-github-to-gitlab.cmd
 ```
 
-Pick one project or **ALL**. Uses `git clone --mirror` + `git push --mirror`.  
+Double-click a project script, or `push-all-github-to-gitlab.cmd` for every repo.  
+Uses `git clone --mirror` + `git push --mirror`.  
 **Warning:** `--mirror` makes GitLab an exact copy of GitHub (GitLab-only branches are deleted).
 
 ## Required `.env` keys

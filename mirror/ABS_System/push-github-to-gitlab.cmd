@@ -1,0 +1,80 @@
+@echo off
+setlocal EnableExtensions EnableDelayedExpansion
+title Push ABS_System GitHub to GitLab
+
+REM =============================================================================
+REM Mirror ABS_System from GitHub onto GitLab (HTTPS).
+REM
+REM WARNING: git push --mirror makes GitLab an EXACT copy of GitHub.
+REM          Branches that exist only on GitLab will be deleted.
+REM
+REM Uses HTTPS (port 443). SSH git@... is often blocked behind Cloudflare.
+REM =============================================================================
+
+set "REPO=ABS_System"
+set "GH=https://github.com/JJasXS/%REPO%.git"
+set "GL=https://gitlabsvr.oneclickclouds.com/softwaredevelopment/%REPO%.git"
+set "TMPDIR=%~dp0_tmp\%REPO%.git"
+
+cd /d "%~dp0"
+if not exist "_tmp" mkdir "_tmp"
+
+where git >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: Git not found in PATH.
+  pause
+  exit /b 1
+)
+
+echo.
+echo ========== GitHub -^> GitLab: %REPO% ==========
+echo GitHub: %GH%
+echo GitLab: %GL%
+echo.
+
+echo [1/4] GitHub heads before:
+git ls-remote --heads "%GH%"
+echo.
+echo [1/4] GitLab heads before:
+git ls-remote --heads "%GL%"
+echo.
+
+if exist "%TMPDIR%" rmdir /s /q "%TMPDIR%"
+
+echo [2/4] Clone --mirror from GitHub...
+git clone --mirror "%GH%" "%TMPDIR%"
+if errorlevel 1 (
+  echo ERROR: mirror clone failed for %REPO%
+  goto :fail
+)
+
+echo [3/4] Push --mirror to GitLab...
+pushd "%TMPDIR%"
+git remote set-url --push origin "%GL%"
+git push --mirror
+if errorlevel 1 (
+  popd
+  echo ERROR: mirror push failed for %REPO%
+  goto :fail
+)
+popd
+
+echo [4/4] Cleanup temp clone...
+rmdir /s /q "%TMPDIR%"
+
+echo.
+echo GitLab heads after:
+git ls-remote --heads "%GL%"
+echo.
+echo OK: %REPO% mirrored.
+echo.
+pause
+endlocal
+exit /b 0
+
+:fail
+echo.
+echo Mirror FAILED for %REPO%.
+pause
+endlocal
+exit /b 1
