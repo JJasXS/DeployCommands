@@ -85,12 +85,6 @@ if exist "%APP_DIR%\.env" (
 ) else if exist "C:\Temp\autoEmailing.env.backup" (
   copy /Y "C:\Temp\autoEmailing.env.backup" "%ENV_PREP%" >nul
   echo Prefill: copied from C:\Temp\autoEmailing.env.backup
-) else if exist "C:\Users\sqlsupport\autoEmailing\.env" (
-  copy /Y "C:\Users\sqlsupport\autoEmailing\.env" "%ENV_PREP%" >nul
-  echo Prefill: copied from local repo .env
-) else if exist "C:\Users\sqlsupport\autoEmailing\.env.example" (
-  copy /Y "C:\Users\sqlsupport\autoEmailing\.env.example" "%ENV_PREP%" >nul
-  echo Prefill: copied from local .env.example
 ) else (
   (
     echo # autoEmailing / SQL Accounting Email Worker
@@ -112,7 +106,6 @@ notepad "%ENV_PREP%"
 
 set "ENV_VALIDATOR=%~dp0validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-autoEmailing-env.ps1"
-if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" (
   echo ERROR: validate-env.ps1 not found next to this script or in C:\Temp.
   echo Put validate-env.ps1 in the SAME folder as this .cmd
@@ -180,9 +173,9 @@ if not exist "%WORK_DIR%\%CSPROJ%" (
   goto :fail
 )
 
-echo [4/8] Publish Release...
+echo [4/8] Publish self-contained win-x64...
 pushd "%WORK_DIR%"
-dotnet publish "%CSPROJ%" -c Release -o "%APP_DIR%"
+dotnet publish "%CSPROJ%" -c Release -r win-x64 --self-contained true -o "%APP_DIR%"
 if errorlevel 1 (
   popd
   echo ERROR: dotnet publish failed.

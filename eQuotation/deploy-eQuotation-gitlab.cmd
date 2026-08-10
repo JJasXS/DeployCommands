@@ -13,7 +13,7 @@ REM   AWS_ACCESS_KEY_ID
 REM   AWS_SECRET_ACCESS_KEY
 REM
 REM Keep validate-env.ps1 in the SAME folder as this .cmd
-REM Needs: Git, Python 3.11 (py launcher), NSSM in PATH
+REM Scripts auto-install Git, Python 3.11, and NSSM via winget when missing
 REM =============================================================================
 
 REM ------------ EDIT FOR EACH CLIENT ------------
@@ -107,7 +107,6 @@ notepad "%ENV_PREP%"
 
 set "ENV_VALIDATOR=%~dp0validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-eQuotation-env.ps1"
-if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" (
   echo ERROR: validate-env.ps1 not found next to this script or in C:\Temp.
   echo Put validate-env.ps1 in the SAME folder as this .cmd
@@ -127,19 +126,44 @@ echo.
 
 where git >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: Git not in PATH.
-  goto :fail
+  echo Installing Git via winget...
+  winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements
 )
-
-where nssm >nul 2>&1
-if errorlevel 1 (
-  echo ERROR: nssm not in PATH. Install NSSM then retry.
-  goto :fail
-)
-
 where py >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: py launcher not found. Install Python %PYTHON_TAG%.
+  echo Installing Python %PYTHON_TAG% via winget...
+  winget install --id Python.Python.3.11 -e --source winget --accept-package-agreements --accept-source-agreements
+) else (
+  py -%PYTHON_TAG% -c "import sys" >nul 2>&1
+  if errorlevel 1 (
+    echo Installing Python %PYTHON_TAG% via winget...
+    winget install --id Python.Python.3.11 -e --source winget --accept-package-agreements --accept-source-agreements
+  )
+)
+where nssm >nul 2>&1
+if errorlevel 1 (
+  echo Installing NSSM via winget...
+  winget install --id NSSM.NSSM -e --source winget --accept-package-agreements --accept-source-agreements
+)
+set "PATH=%PATH%;%ProgramFiles%\Git\cmd;%ProgramFiles%\nssm;%ProgramFiles(x86)%\nssm;%LOCALAPPDATA%\Microsoft\WinGet\Links"
+where git >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: Git still not in PATH. Open a new Admin CMD and retry.
+  goto :fail
+)
+where nssm >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: nssm still not in PATH. Install NSSM, add it to PATH, then retry.
+  goto :fail
+)
+where py >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: py launcher not found. Install Python %PYTHON_TAG% then retry.
+  goto :fail
+)
+py -%PYTHON_TAG% -c "import sys" >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: Python %PYTHON_TAG% not available via py launcher. Install Python %PYTHON_TAG% then retry.
   goto :fail
 )
 

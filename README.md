@@ -17,6 +17,14 @@ Double-click Windows deploy scripts for ProAcc projects. Each app folder has:
 
 GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocked behind Cloudflare.
 
+## Client deploy notes
+
+- Keep `validate-env.ps1` in the **same folder** as the `.cmd` you run.
+- The PC needs network access and git HTTPS auth for the chosen remote (GitHub or GitLab). Use a cached credential, PAT, or signed-in Git Credential Manager.
+- .NET apps auto-install Git + the required SDK via winget when missing, and publish **self-contained** win-x64.
+- **eQuotation** auto-installs Git, Python 3.11, and NSSM via winget when missing (if winget fails for NSSM, install it manually and ensure `nssm` is on PATH).
+- **ABS_System** deploys branch `fix-from-old` (not `main`).
+
 ## Projects
 
 | Folder | Service | Port | Branch | Notes |
@@ -54,4 +62,4 @@ Most apps:
 - `AWS_SECRET_ACCESS_KEY`
 
 ApprovalPO also needs `FIREBIRD_PASSWORD`.  
-autoEmailing requires at least `TENANT_CODE` (other keys optional / from `.env.example`).
+autoEmailing requires at least `TENANT_CODE` (other keys optional).

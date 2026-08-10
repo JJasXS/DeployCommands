@@ -47,6 +47,16 @@ if errorlevel 1 (
     echo sh.ShellExecute "cmd.exe", "/k cd /d ""%~dp0"" ^& call ""%~f0""", "%~dp0", "runas", 1
   ) > "%TEMP%\elevate_approvalpo.vbs"
   wscript //nologo "%TEMP%\elevate_approvalpo.vbs"
+  if errorlevel 1 (
+    echo.
+    echo ERROR: Could not request elevation.
+    echo Right-click this file -^> Run as administrator
+    pause
+    exit /b 1
+  )
+  echo.
+  echo If no Admin window appeared, right-click this file and choose "Run as administrator".
+  pause
   exit /b 0
 )
 
@@ -86,9 +96,6 @@ if exist "%APP_DIR%\.env" (
 ) else if exist "C:\Temp\ApprovalPO.env.backup" (
   copy /Y "C:\Temp\ApprovalPO.env.backup" "%ENV_PREP%" >nul
   echo Prefill: copied from C:\Temp\ApprovalPO.env.backup
-) else if exist "C:\Users\sqlsupport\ApprovalPO\.env" (
-  copy /Y "C:\Users\sqlsupport\ApprovalPO\.env" "%ENV_PREP%" >nul
-  echo Prefill: copied from repo .env
 ) else (
   (
     echo # ApprovalPO / e-Approval
@@ -109,7 +116,6 @@ notepad "%ENV_PREP%"
 
 set "ENV_VALIDATOR=%~dp0validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-ApprovalPO-env.ps1"
-if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" (
   echo ERROR: validate-env.ps1 not found next to this script or in C:\Temp.
   call :log ERROR missing validate-env.ps1

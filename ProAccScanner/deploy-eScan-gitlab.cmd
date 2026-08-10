@@ -107,7 +107,6 @@ notepad "%ENV_PREP%"
 
 set "ENV_VALIDATOR=%~dp0validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-eScan-env.ps1"
-if not exist "%ENV_VALIDATOR%" set "ENV_VALIDATOR=C:\Temp\validate-env.ps1"
 if not exist "%ENV_VALIDATOR%" (
   echo ERROR: validate-env.ps1 not found next to this script or in C:\Temp.
   echo Put validate-env.ps1 in the SAME folder as this .cmd
