@@ -31,7 +31,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 |--------|---------|------|--------|-------|
 | `ProAccScanner` | `ProAccScanner` | 8443 | `main` | eScan / `FirebirdWeb.exe` |
 | `ABS_System` | `ABS_System` | 8080 | `fix-from-old` | e-Booking |
-| `ApprovalPO` | `ApprovalPO` | 2095 | `main` | Needs `FIREBIRD_PASSWORD` |
+| `ApprovalPO` | `ApprovalPO` | 2095 / 2096 | `main` | Needs `FIREBIRD_PASSWORD`; HTTP 2095 primary |
 | `eQuotation` | `ProAcc_eQuotation` | 8880 | `main` | Python + NSSM |
 | `autoEmailing` | `SQL Accounting Email Worker` | (none) | `main` | Background worker |
 

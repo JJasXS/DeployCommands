@@ -27,10 +27,13 @@ set "CSPROJ=ApprovalPO.csproj"
 
 set "WORK_DIR=C:\ApprovalPO"
 set "APP_DIR=C:\Apps\ApprovalPO\publish"
+REM Ports match appsettings.json Approval:PublicHttpPort / PublicHttpsPort
 set "HTTP_PORT=2095"
+set "HTTPS_PORT=2096"
 set "ENV_PREP=%TEMP%\ApprovalPO.env.prepared"
 set "ENV_BACKUP=%TEMP%\ApprovalPO.env.backup"
-set "FW_RULE_NAME=ApprovalPO %HTTP_PORT%"
+set "FW_RULE_HTTP=ApprovalPO %HTTP_PORT%"
+set "FW_RULE_HTTPS=ApprovalPO %HTTPS_PORT%"
 set "DEPLOY_LOG=C:\Temp\ApprovalPO-deploy.log"
 REM ----------------------------------------------
 
@@ -156,14 +159,32 @@ if errorlevel 1 (
   echo ERROR: dotnet still not in PATH. Open a new Admin CMD and retry.
   goto :fail
 )
+REM Prefer real SDK exe. ApprovalPO repo ships a local "dotnet.cmd" that intercepts
+REM "dotnet run"; calling bare "dotnet" after pushd into the clone transfers control
+REM to that .cmd and NEVER returns to this deploy script (classic CMD CALL bug).
+set "DOTNET_EXE=%ProgramFiles%\dotnet\dotnet.exe"
+if not exist "%DOTNET_EXE%" set "DOTNET_EXE=%ProgramFiles(x86)%\dotnet\dotnet.exe"
+if not exist "%DOTNET_EXE%" (
+  echo ERROR: dotnet.exe not found under Program Files.
+  call :log ERROR dotnet.exe missing
+  goto :fail
+)
+echo Using: %DOTNET_EXE%
+call :log DOTNET_EXE=%DOTNET_EXE%
 
-echo [0/10] Firewall allow inbound TCP %HTTP_PORT%...
+echo [0/10] Firewall allow inbound TCP %HTTP_PORT% + %HTTPS_PORT%...
 call :log STEP0 firewall
-netsh advfirewall firewall show rule name="%FW_RULE_NAME%" >nul 2>&1
+netsh advfirewall firewall show rule name="%FW_RULE_HTTP%" >nul 2>&1
 if errorlevel 1 (
-  netsh advfirewall firewall add rule name="%FW_RULE_NAME%" dir=in action=allow protocol=TCP localport=%HTTP_PORT%
+  netsh advfirewall firewall add rule name="%FW_RULE_HTTP%" dir=in action=allow protocol=TCP localport=%HTTP_PORT%
 ) else (
-  echo   Rule already exists: %FW_RULE_NAME%
+  echo   Rule already exists: %FW_RULE_HTTP%
+)
+netsh advfirewall firewall show rule name="%FW_RULE_HTTPS%" >nul 2>&1
+if errorlevel 1 (
+  netsh advfirewall firewall add rule name="%FW_RULE_HTTPS%" dir=in action=allow protocol=TCP localport=%HTTPS_PORT%
+) else (
+  echo   Rule already exists: %FW_RULE_HTTPS%
 )
 
 echo [1/10] Stop / remove old service...
@@ -177,11 +198,13 @@ taskkill /F /IM "%EXE_NAME%" >nul 2>&1
 sc delete "%APP_NAME%" >nul 2>&1
 timeout /t 3 /nobreak >nul
 
-echo [2/10] Free port %HTTP_PORT%...
+echo [2/10] Free ports %HTTP_PORT% / %HTTPS_PORT%...
 call :log STEP2 free port
-for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":%HTTP_PORT%" ^| findstr LISTENING') do (
-  echo   Ending PID %%P
-  taskkill /F /PID %%P >nul 2>&1
+for %%Q in (%HTTP_PORT% %HTTPS_PORT%) do (
+  for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":%%Q" ^| findstr LISTENING') do (
+    echo   Ending PID %%P on port %%Q
+    taskkill /F /PID %%P >nul 2>&1
+  )
 )
 timeout /t 2 /nobreak >nul
 
@@ -208,28 +231,29 @@ if not exist "%WORK_DIR%\%CSPROJ%" (
   goto :fail
 )
 
-echo [5/10] Clean + publish self-contained win-x64...
-echo   This can take 1-3 minutes -- leave this window open.
+echo [5/10] Publish self-contained win-x64...
+echo.
+echo   IMPORTANT: Do NOT close this window.
+echo   First run can take 3-10 minutes while NuGet downloads the runtime (~100MB+).
+echo   Live restore/build lines will scroll below. Log: %DEPLOY_LOG%
+echo.
 call :log STEP5 publish start
 pushd "%WORK_DIR%"
-dotnet clean "%CSPROJ%" -c Release
 if exist bin rmdir /s /q bin
 if exist obj rmdir /s /q obj
-dotnet restore "%CSPROJ%"
+REM Fresh clone: skip "dotnet clean" + separate restore. One publish includes restore.
+REM Separate clean/restore made a long quiet wait that looked hung and led to closing the window.
+echo   [%TIME%] Starting "%DOTNET_EXE%" publish (live output below)...
+call :log STEP5 dotnet publish invoke
+"%DOTNET_EXE%" publish "%CSPROJ%" -c Release -r win-x64 --self-contained true -o "%APP_DIR%" --nologo --verbosity minimal
 if errorlevel 1 (
   popd
-  echo ERROR: dotnet restore failed.
-  call :log ERROR restore failed
-  goto :fail
-)
-dotnet publish "%CSPROJ%" -c Release -r win-x64 --self-contained true -o "%APP_DIR%"
-if errorlevel 1 (
-  popd
-  echo ERROR: dotnet publish failed.
+  echo ERROR: dotnet publish failed. See console output above / log: %DEPLOY_LOG%
   call :log ERROR publish failed
   goto :fail
 )
 popd
+echo   [%TIME%] Publish finished -- continuing to service install...
 call :log STEP5 publish ok
 
 if not exist "%APP_DIR%\%EXE_NAME%" (
@@ -261,7 +285,19 @@ sc failure "%APP_NAME%" reset= 86400 actions= restart/60000/restart/60000/restar
 echo [8/10] Start service...
 call :log STEP8 start
 sc start "%APP_NAME%"
+if errorlevel 1 (
+  echo ERROR: sc start failed.
+  call :log ERROR sc start failed
+  goto :fail
+)
 timeout /t 6 /nobreak >nul
+sc query "%APP_NAME%" | findstr /I "RUNNING" >nul
+if errorlevel 1 (
+  echo WARNING: service may not be RUNNING yet. Check log / Event Viewer.
+  call :log WARN service not RUNNING after start
+) else (
+  call :log STEP8 service RUNNING
+)
 
 echo [9/10] Cleanup clone...
 call :log STEP9 cleanup
@@ -276,15 +312,16 @@ sc query "%APP_NAME%"
 echo.
 tasklist | findstr /I "%EXE_NAME%"
 echo.
-echo Listening on %HTTP_PORT%:
-netstat -ano | findstr ":%HTTP_PORT%"
+echo Listening on %HTTP_PORT% / %HTTPS_PORT%:
+netstat -ano | findstr ":%HTTP_PORT% :%HTTPS_PORT%"
 echo.
 dir "%APP_DIR%\*.exe"
 echo.
 if exist "%APP_DIR%\%EXE_NAME%" (echo EXE: OK) else (echo EXE: MISSING)
 if exist "%APP_DIR%\.env" (echo .env: OK) else (echo .env: MISSING)
 echo.
-echo Browser: http://127.0.0.1:%HTTP_PORT%/Login
+echo Browser HTTP:  http://127.0.0.1:%HTTP_PORT%/Login
+echo Browser HTTPS: https://127.0.0.1:%HTTPS_PORT%/Login  ^(when TLS cert is present^)
 echo Log: %DEPLOY_LOG%
 echo.
 start "" "http://127.0.0.1:%HTTP_PORT%/Login"
