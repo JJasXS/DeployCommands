@@ -33,9 +33,27 @@ Login page only. Do **not** show countdown or lock overlay inside procurement / 
 ```text
 🔒 Subscription Expired
 Your subscription has expired.
-Please contact ProAcc System to renew and restore access.
+Please contact ProAcc System to renew your subscription and restore access.
 [Contact Support]
 ```
+
+### Screenshots (login)
+
+**7 days**
+
+![7 days](subscription-screenshots/7-days.png)
+
+**3 days**
+
+![3 days](subscription-screenshots/3-days.png)
+
+**1 day**
+
+![1 day](subscription-screenshots/1-day.png)
+
+**Expired**
+
+![Expired](subscription-screenshots/expired.png)
 
 ---
 

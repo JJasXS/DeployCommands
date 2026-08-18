@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>expired</title>
+    <link rel="stylesheet" href="file:///c:/Users/sqlsupport/eQuotation/static/css/equotationIcyTheme.css">
+    <link rel="stylesheet" href="file:///c:/Users/sqlsupport/eQuotation/static/css/login.css">
+    <style>
+      .login-carousel-slide { width: 100%; }
+      .login-carousel-track { transform: none; }
+    </style>
+</head>
+<body class="equotation-icy-theme login-page-body is-license-expired">
+
+    <div class="login-license-lockout" role="alertdialog" aria-modal="true">
+        <div class="login-license-lockout__card">
+            <div class="login-license-lockout__emoji" aria-hidden="true">🔒</div>
+            <h1 class="login-license-lockout__title">Subscription Expired</h1>
+            <p class="login-license-lockout__lead">Your subscription has expired.</p>
+            <p class="login-license-lockout__hint">Please contact ProAcc System to renew your subscription and restore access.</p>
+            <a class="login-license-wa" href="#">Contact Support</a>
+        </div>
+    </div>
+    <div class="login-page">
+        <aside class="login-aside">
+            <div class="login-aside-header">
+                <p class="login-aside-kicker">Sign in as</p>
+                <p class="login-aside-hint">Choose your account type. We look up your email only in that directory.</p>
+            </div>
+            <div class="login-carousel-viewport">
+                <div class="login-carousel-track">
+                    <button type="button" class="login-carousel-slide is-active">
+                        <span class="login-carousel-icon" aria-hidden="true">🛒</span>
+                        <span class="login-carousel-title">Customer</span>
+                        <span class="login-carousel-desc">Quotations and orders for AR customer or branch</span>
+                    </button>
+                </div>
+            </div>
+            <div class="login-carousel-nav">
+                <button type="button" class="login-carousel-arrow">‹</button>
+                <div class="login-carousel-dots">
+                    <button class="login-carousel-dot" type="button"></button>
+                    <button class="login-carousel-dot" type="button" aria-current="true"></button>
+                    <button class="login-carousel-dot" type="button"></button>
+                </div>
+                <button type="button" class="login-carousel-arrow">›</button>
+            </div>
+        </aside>
+        <div class="login-main">
+            <div class="login-container">
+                <div class="login-brand">
+                    <img src="file:///c:/Users/sqlsupport/eQuotation/static/images/equote_logo.png" alt="ProAcc eQuotation" class="login-logo" />
+                </div>
+                <div class="login-card">
+                    <div id="email-step" class="login-step active">
+                        <form>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" placeholder="your@email.com" />
+                            </div>
+                            <button type="button" class="btn-submit">Continue</button>
+                        </form>
+                        <a href="#" class="btn-guest">Sign in as Guest</a>
+                    </div>
+                    <div class="login-meta">
+
+                        <div>Managed by ProAcc System.</div>
+                        <div class="login-version">V1.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
