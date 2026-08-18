@@ -7,3 +7,4 @@
 .DS_Store
 Thumbs.db
 mirror/_tmp/
+mirror/**/_tmp/

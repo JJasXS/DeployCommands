@@ -19,7 +19,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
-for %%R in (ProAccScanner autoEmailing ABS_System eQuotation ApprovalPO) do (
+for %%R in (ProAccScanner autoEmailing ABS_System eQuotation ApprovalPO multiDBSync) do (
   set "REPO=%%R"
   set "GH=https://github.com/JJasXS/%%R.git"
   set "GL=https://gitlabsvr.oneclickclouds.com/softwaredevelopment/%%R.git"
