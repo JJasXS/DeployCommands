@@ -8,6 +8,7 @@ REM Double-click OK -- auto-elevates. Collects .env FIRST (Notepad), then deploy
 REM
 REM Required .env keys:
 REM   TENANT_CODE
+REM   TENANT_BOOTSTRAP_API_URL
 REM
 REM Optional (often useful):
 REM   AWS_REGION / AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
@@ -70,7 +71,7 @@ REM ============================================================================
 REM STEP 0 -- Enter .env FIRST (Notepad). Deploy starts only after Save + Close.
 REM =============================================================================
 echo ========== STEP 0 / ENV ==========
-echo Fill at least TENANT_CODE, Save, then CLOSE Notepad.
+echo Fill TENANT_CODE and TENANT_BOOTSTRAP_API_URL, Save, then CLOSE Notepad.
 echo Optional: AWS keys / schedule settings ^(see .env.example in the repo^).
 echo.
 
@@ -90,6 +91,7 @@ if exist "%APP_DIR%\.env" (
   (
     echo # autoEmailing / SQL Accounting Email Worker
     echo TENANT_CODE=
+    echo TENANT_BOOTSTRAP_API_URL=
     echo AWS_REGION=ap-southeast-1
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
@@ -115,7 +117,7 @@ if not exist "%ENV_VALIDATOR%" (
 powershell -NoProfile -ExecutionPolicy Bypass -File "%ENV_VALIDATOR%" -EnvPath "%ENV_PREP%"
 if errorlevel 1 (
   echo.
-  echo .env is incomplete. Fix TENANT_CODE and run this script again.
+  echo .env is incomplete. Fix TENANT_CODE and TENANT_BOOTSTRAP_API_URL, then run this script again.
   goto :fail
 )
 

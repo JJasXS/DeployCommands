@@ -10,6 +10,7 @@ REM Log: C:\Temp\ApprovalPO-deploy.log
 REM
 REM Required .env keys:
 REM   TENANT_CODE
+REM   TENANT_BOOTSTRAP_API_URL
 REM   FIREBIRD_PASSWORD
 REM   AWS_REGION
 REM   AWS_ACCESS_KEY_ID
@@ -80,6 +81,7 @@ REM ============================================================================
 echo ========== STEP 0 / ENV ==========
 echo Fill these values, Save, then CLOSE Notepad:
 echo   TENANT_CODE=...
+echo   TENANT_BOOTSTRAP_API_URL=https://...execute-api.../proacc-tenant-config-api
 echo   FIREBIRD_PASSWORD=...
 echo   AWS_REGION=ap-southeast-1
 echo   AWS_ACCESS_KEY_ID=...
@@ -102,6 +104,7 @@ if exist "%APP_DIR%\.env" (
   (
     echo # ApprovalPO / e-Approval
     echo TENANT_CODE=
+    echo TENANT_BOOTSTRAP_API_URL=
     echo FIREBIRD_PASSWORD=
     echo AWS_REGION=ap-southeast-1
     echo AWS_ACCESS_KEY_ID=

@@ -25,10 +25,20 @@ foreach ($k in $need) {
     }
 }
 
+$tenantApiUrl = ''
+if ($map.ContainsKey('TENANT_BOOTSTRAP_API_URL') -and -not [string]::IsNullOrWhiteSpace($map['TENANT_BOOTSTRAP_API_URL'])) {
+    $tenantApiUrl = $map['TENANT_BOOTSTRAP_API_URL'].Trim()
+} elseif ($map.ContainsKey('TenantBootstrap__AwsApiBaseUrl') -and -not [string]::IsNullOrWhiteSpace($map['TenantBootstrap__AwsApiBaseUrl'])) {
+    $tenantApiUrl = $map['TenantBootstrap__AwsApiBaseUrl'].Trim()
+}
+if ([string]::IsNullOrWhiteSpace($tenantApiUrl)) {
+    $bad += 'TENANT_BOOTSTRAP_API_URL'
+}
+
 if ($bad.Count -gt 0) {
     Write-Host ("ERROR: missing/empty: " + ($bad -join ', '))
     exit 3
 }
 
-Write-Host ("OK: TENANT_CODE=" + $map['TENANT_CODE'])
+Write-Host ("OK: TENANT_CODE=" + $map['TENANT_CODE'] + "  TENANT_API_URL set")
 exit 0

@@ -21,6 +21,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 
 - Keep `validate-env.ps1` in the **same folder** as the `.cmd` you run.
 - The PC needs network access and git HTTPS auth for the chosen remote (GitHub or GitLab). Use a cached credential, PAT, or signed-in Git Credential Manager.
+- **GitHub deploy scripts** clone private `JJasXS/*` repos; sign in to GitHub in Git Credential Manager on that PC first.
 - .NET apps auto-install Git + the required SDK via winget when missing, and publish **self-contained** win-x64.
 - **eQuotation** auto-installs Git, Python 3.11, and NSSM via winget when missing (if winget fails for NSSM, install it manually and ensure `nssm` is on PATH).
 - **ABS_System** deploys branch `fix-from-old` (not `main`).
@@ -54,12 +55,19 @@ Uses `git clone --mirror` + `git push --mirror`.
 
 ## Required `.env` keys
 
-Most apps:
+All tenant-bootstrap apps need:
 
 - `TENANT_CODE`
+- `TENANT_BOOTSTRAP_API_URL` (tenant-config API invoke URL; no longer defaulted in `appsettings.json`)
+
+Most apps also need:
+
 - `AWS_REGION`
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 
-ApprovalPO also needs `FIREBIRD_PASSWORD`.  
-autoEmailing requires at least `TENANT_CODE` (other keys optional).
+ApprovalPO also needs `FIREBIRD_PASSWORD`.
+
+autoEmailing requires `TENANT_CODE` and `TENANT_BOOTSTRAP_API_URL` (AWS keys and schedule optional).
+
+`TenantBootstrap__AwsApiBaseUrl` is accepted instead of `TENANT_BOOTSTRAP_API_URL` if you prefer the .NET env naming.

@@ -8,6 +8,7 @@ REM Double-click OK -- auto-elevates. Collects .env FIRST (Notepad), then deploy
 REM
 REM Required .env keys:
 REM   TENANT_CODE
+REM   TENANT_BOOTSTRAP_API_URL
 REM   AWS_REGION
 REM   AWS_ACCESS_KEY_ID
 REM   AWS_SECRET_ACCESS_KEY
@@ -70,8 +71,9 @@ REM ============================================================================
 REM STEP 0 -- Enter .env FIRST (Notepad). Deploy starts only after Save + Close.
 REM =============================================================================
 echo ========== STEP 0 / ENV ==========
-echo Fill these 4 values, Save, then CLOSE Notepad:
+echo Fill these values, Save, then CLOSE Notepad:
 echo   TENANT_CODE=...
+echo   TENANT_BOOTSTRAP_API_URL=https://...execute-api.../proacc-tenant-config-api
 echo   AWS_REGION=ap-southeast-1
 echo   AWS_ACCESS_KEY_ID=...
 echo   AWS_SECRET_ACCESS_KEY=...
@@ -90,8 +92,9 @@ if exist "%APP_DIR%\.env" (
   echo Prefill: copied from C:\Temp\ProAccScanner.env.backup
 ) else (
   (
-    echo # ProAcc eScan - required for OTP email via AWS Secrets Manager
+    echo # ProAcc eScan - tenant API URL no longer defaults in appsettings.json
     echo TENANT_CODE=
+    echo TENANT_BOOTSTRAP_API_URL=
     echo AWS_REGION=ap-southeast-1
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
