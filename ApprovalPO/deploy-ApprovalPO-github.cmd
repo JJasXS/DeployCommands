@@ -211,22 +211,43 @@ for %%Q in (%HTTP_PORT% %HTTPS_PORT%) do (
 )
 timeout /t 2 /nobreak >nul
 
-echo [3/10] Wipe old source / publish folders...
-call :log STEP3 wipe
-if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
+echo [3/10] Wipe old publish folder (keep source clone for faster updates)...
+call :log STEP3 wipe publish
 if exist "%APP_DIR%" rmdir /s /q "%APP_DIR%"
 timeout /t 1 /nobreak >nul
 if not exist "C:\Apps\ApprovalPO" mkdir "C:\Apps\ApprovalPO"
 if not exist "%APP_DIR%" mkdir "%APP_DIR%"
 
-echo [4/10] Clone GitHub branch %GIT_BRANCH%...
-call :log STEP4 clone
-echo   URL: %REPO_URL%
-git clone --depth 1 -b %GIT_BRANCH% "%REPO_URL%" "%WORK_DIR%"
-if errorlevel 1 (
-  echo ERROR: git clone failed.
-  call :log ERROR clone failed
-  goto :fail
+echo [4/10] Update source from GitHub branch %GIT_BRANCH%...
+call :log STEP4 git update
+if exist "%WORK_DIR%\.git" (
+  echo   Existing clone: git fetch + reset
+  pushd "%WORK_DIR%"
+  git fetch origin %GIT_BRANCH% --depth 1
+  if errorlevel 1 (
+    popd
+    echo ERROR: git fetch failed.
+    call :log ERROR fetch failed
+    goto :fail
+  )
+  git reset --hard "origin/%GIT_BRANCH%"
+  if errorlevel 1 (
+    popd
+    echo ERROR: git reset failed.
+    call :log ERROR reset failed
+    goto :fail
+  )
+  popd
+) else (
+  if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
+  echo   First deploy: shallow clone
+  echo   URL: %REPO_URL%
+  git clone --depth 1 -b %GIT_BRANCH% "%REPO_URL%" "%WORK_DIR%"
+  if errorlevel 1 (
+    echo ERROR: git clone failed.
+    call :log ERROR clone failed
+    goto :fail
+  )
 )
 if not exist "%WORK_DIR%\%CSPROJ%" (
   echo ERROR: clone missing %CSPROJ%
@@ -237,7 +258,8 @@ if not exist "%WORK_DIR%\%CSPROJ%" (
 echo [5/10] Publish self-contained win-x64...
 echo.
 echo   IMPORTANT: Do NOT close this window.
-echo   First run can take 3-10 minutes while NuGet downloads the runtime (~100MB+).
+echo   First publish on this PC can take 3-10 minutes while NuGet downloads the runtime (~100MB+).
+echo   Later deploys are faster (source kept at %WORK_DIR%, NuGet cache reused).
 echo   Live restore/build lines will scroll below. Log: %DEPLOY_LOG%
 echo.
 call :log STEP5 publish start
@@ -302,10 +324,9 @@ if errorlevel 1 (
   call :log STEP8 service RUNNING
 )
 
-echo [9/10] Cleanup clone...
-call :log STEP9 cleanup
+echo [9/10] Source kept at %WORK_DIR% for faster next deploy...
+call :log STEP9 keep clone
 cd /d C:\
-if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
 
 echo [10/10] Verify...
 call :log STEP10 verify
