@@ -25,6 +25,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 - .NET apps auto-install Git + the required SDK via winget when missing, and publish **self-contained** win-x64.
 - **eQuotation** auto-installs Git, Python 3.11, and NSSM via winget when missing (if winget fails for NSSM, install it manually and ensure `nssm` is on PATH).
 - **ABS_System** deploys branch `fix-from-old` (not `main`).
+- **SqlAccountSync** clones GitHub/GitLab repo `multiDBSync` (folder name differs), branch `master`, and requires `ASPNETCORE_URLS=http://0.0.0.0:5030` in `.env` so the Windows service binds to 5030.
 
 ## Projects
 
@@ -35,6 +36,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 | `ApprovalPO` | `ApprovalPO` | 2095 / 2096 | `main` | Needs `FIREBIRD_PASSWORD`; HTTP 2095 primary |
 | `eQuotation` | `ProAcc_eQuotation` | 8880 | `main` | Python + NSSM |
 | `autoEmailing` | `SQL Accounting Email Worker` | (none) | `main` | Background worker |
+| `SqlAccountSync` | `SqlAccountSync` | 5030 | `master` | Repo `multiDBSync`; nested `src\SqlAccountSync\SqlAccountSync.csproj`; .NET 8 |
 
 ## Mirror GitHub → GitLab
 
@@ -46,6 +48,7 @@ mirror\autoEmailing\push-github-to-gitlab.cmd
 mirror\ABS_System\push-github-to-gitlab.cmd
 mirror\eQuotation\push-github-to-gitlab.cmd
 mirror\ApprovalPO\push-github-to-gitlab.cmd
+mirror\SqlAccountSync\push-github-to-gitlab.cmd
 mirror\push-all-github-to-gitlab.cmd
 ```
 
