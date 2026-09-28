@@ -175,15 +175,13 @@ if errorlevel 1 (
   echo   Rule already exists: %FW_RULE_NAME%
 )
 
-echo [1/10] Stop / remove old service...
+echo [1/10] Stop old service...
 sc query "%APP_NAME%" >nul 2>&1
 if not errorlevel 1 (
   sc stop "%APP_NAME%" >nul 2>&1
   timeout /t 5 /nobreak >nul
 )
 taskkill /F /IM "%EXE_NAME%" >nul 2>&1
-sc delete "%APP_NAME%" >nul 2>&1
-timeout /t 3 /nobreak >nul
 
 echo [2/10] Free port %HTTP_PORT%...
 for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":%HTTP_PORT%" ^| findstr LISTENING') do (
@@ -246,13 +244,13 @@ if not exist "%APP_DIR%\.env" (
 )
 
 echo [7/10] Register Windows Service...
-sc create "%APP_NAME%" binPath= "\"%APP_DIR%\%EXE_NAME%\"" start= auto
+call :EnsureService
 if errorlevel 1 (
-  echo ERROR: sc create failed.
+  echo ERROR: could not register the Windows service.
+  echo Close services.msc if it is open, then run this script again.
+  echo If it still says marked for deletion, reboot once and run it again.
   goto :fail
 )
-sc description "%APP_NAME%" "SQL Account Sync Background Service"
-sc failure "%APP_NAME%" reset= 86400 actions= restart/60000/restart/60000/restart/60000 >nul 2>&1
 
 echo [8/10] Start service...
 sc start "%APP_NAME%"
@@ -292,3 +290,27 @@ echo Deploy FAILED. Press any key to close.
 pause
 endlocal
 exit /b 1
+
+:EnsureService
+sc query "%APP_NAME%" >nul 2>&1
+if errorlevel 1 goto :CreateService
+sc config "%APP_NAME%" binPath= "\"%APP_DIR%\%EXE_NAME%\"" start= auto >nul 2>&1
+if not errorlevel 1 goto :DescribeService
+echo   Service is marked for deletion. Waiting for Windows to release it...
+for /L %%I in (1,1,30) do (
+  sc query "%APP_NAME%" >nul 2>&1
+  if errorlevel 1 goto :CreateService
+  timeout /t 2 /nobreak >nul
+)
+sc query "%APP_NAME%" >nul 2>&1
+if errorlevel 1 goto :CreateService
+exit /b 1
+
+:CreateService
+sc create "%APP_NAME%" binPath= "\"%APP_DIR%\%EXE_NAME%\"" start= auto
+if errorlevel 1 exit /b 1
+
+:DescribeService
+sc description "%APP_NAME%" "SQL Account Sync Background Service" >nul 2>&1
+sc failure "%APP_NAME%" reset= 86400 actions= restart/60000/restart/60000/restart/60000 >nul 2>&1
+exit /b 0
