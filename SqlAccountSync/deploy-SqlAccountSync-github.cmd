@@ -101,12 +101,10 @@ if exist "%APP_DIR%\.env" (
     echo AWS_REGION=ap-southeast-1
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
-    echo ASPNETCORE_ENVIRONMENT=Production
     echo ASPNETCORE_URLS=http://0.0.0.0:5030
     echo.
     echo # Optional central Firebird control DB ^(app starts without it; /health still works^)
     echo # CentralDb__Path=C:/SQLData/SqlAccountSync/SYNC.FDB
-    echo # CentralDb__PasswordSecretRef=env:CENTRAL_FB_MASTERKEY
     echo # CENTRAL_FB_MASTERKEY=masterkey
   ) > "%ENV_PREP%"
   echo Prefill: new template created
