@@ -26,6 +26,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 - **eQuotation** auto-installs Git, Python 3.11, and NSSM via winget when missing (if winget fails for NSSM, install it manually and ensure `nssm` is on PATH).
 - **ABS_System** deploys branch `fix-from-old` (not `main`).
 - **SqlAccountSync** clones GitHub/GitLab repo `multiDBSync` (folder name differs), branch `master`, and requires `ASPNETCORE_URLS=http://0.0.0.0:5030` in `.env` so the Windows service binds to 5030.
+- **StudentPortal** listens on **5000** (API and the built site together). Vite dev port **5173** is only for `run.ps1`. Needs the .NET 10 SDK and Node.js. Does not use tenant bootstrap keys.
 
 ## Projects
 
@@ -37,6 +38,7 @@ GitLab scripts use **HTTPS** (port 443). SSH `git@...` (port 22) is often blocke
 | `eQuotation` | `ProAcc_eQuotation` | 8880 | `main` | Python + NSSM |
 | `autoEmailing` | `SQL Accounting Email Worker` | (none) | `main` | Background worker |
 | `SqlAccountSync` | `SqlAccountSync` | 5030 | `master` | Repo `multiDBSync`; nested `src\SqlAccountSync\SqlAccountSync.csproj`; .NET 8 |
+| `StudentPortal` | `StudentPortal` | 5000 | `main` | Music Tuition Portal; `MusicTuitionPortal.Api.exe`; .NET 10. Dev UI port 5173 is not the service |
 
 ## Mirror GitHub → GitLab
 
@@ -49,6 +51,7 @@ mirror\ABS_System\push-github-to-gitlab.cmd
 mirror\eQuotation\push-github-to-gitlab.cmd
 mirror\ApprovalPO\push-github-to-gitlab.cmd
 mirror\SqlAccountSync\push-github-to-gitlab.cmd
+mirror\StudentPortal\push-github-to-gitlab.cmd
 mirror\push-all-github-to-gitlab.cmd
 ```
 
@@ -74,3 +77,5 @@ ApprovalPO also needs `FIREBIRD_PASSWORD`.
 autoEmailing requires `TENANT_CODE` and `TENANT_BOOTSTRAP_API_URL` (AWS keys and schedule optional).
 
 `TenantBootstrap__AwsApiBaseUrl` is accepted instead of `TENANT_BOOTSTRAP_API_URL` if you prefer the .NET env naming.
+
+StudentPortal uses its own keys: `ASPNETCORE_URLS` (`http://0.0.0.0:5000`), `VITE_API_URL` (`http://127.0.0.1:5000/api`), `DatabaseProvider`, `SqlAccount__DatabasePath`, `SqlAccount__DbUser`, `SqlAccount__DbPassword`, and `Jwt__Secret`.
