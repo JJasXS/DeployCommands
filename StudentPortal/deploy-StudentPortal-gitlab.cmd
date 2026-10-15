@@ -292,6 +292,7 @@ if errorlevel 1 (
 )
 sc description "%APP_NAME%" "Music Tuition Portal on port %HTTP_PORT%"
 sc failure "%APP_NAME%" reset= 86400 actions= restart/5000/restart/5000/restart/5000
+sc config "%APP_NAME%" start= auto
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0set-service-env.ps1" -EnvPath "%ENV_PREP%" -ServiceName "%APP_NAME%"
 if errorlevel 1 (
@@ -323,12 +324,13 @@ if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
 
 echo.
 echo Done.
-echo   Site:    http://127.0.0.1:%HTTP_PORT%/
-echo   API:     http://127.0.0.1:%HTTP_PORT%/api
+echo   Site:    http://localhost:%HTTP_PORT%/
+echo   API:     http://localhost:%HTTP_PORT%/api
 echo   Service: %APP_NAME%
 echo   Files:   %APP_DIR%
 echo.
-start "" "http://127.0.0.1:%HTTP_PORT%/"
+echo Opening http://localhost:%HTTP_PORT%/
+start "" "http://localhost:%HTTP_PORT%/"
 pause
 endlocal
 exit /b 0

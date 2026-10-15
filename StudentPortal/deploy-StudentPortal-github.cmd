@@ -292,6 +292,7 @@ if errorlevel 1 (
 )
 sc description "%APP_NAME%" "Music Tuition Portal on port %HTTP_PORT%"
 sc failure "%APP_NAME%" reset= 86400 actions= restart/5000/restart/5000/restart/5000
+sc config "%APP_NAME%" start= auto
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0set-service-env.ps1" -EnvPath "%ENV_PREP%" -ServiceName "%APP_NAME%"
 if errorlevel 1 (
