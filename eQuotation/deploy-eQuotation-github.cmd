@@ -31,6 +31,9 @@ set "ENV_PREP=%TEMP%\ProAcc_eQuotation.env.prepared"
 set "ENV_BACKUP=%TEMP%\ProAcc_eQuotation_env_backup.bak"
 REM ----------------------------------------------
 
+REM Remember interactive user before UAC (Admin session is a different account).
+echo %USERDOMAIN%\%USERNAME%> "%TEMP%\ProAcc_eQuotation.restart-user.txt"
+
 REM --- Auto-elevate (first window closes; a new Admin window opens) ---
 net session >nul 2>&1
 if errorlevel 1 (
@@ -296,11 +299,22 @@ nssm set "%APP_NAME%" Start SERVICE_AUTO_START
 nssm set "%APP_NAME%" DisplayName "ProAcc eQuotation"
 nssm set "%APP_NAME%" Description "ProAcc eQuotation unified server (Flask + FastAPI on port %FLASK_PORT%)."
 
-echo [11/12] Start service...
+echo [11/13] Start service...
 nssm start "%APP_NAME%"
 timeout /t 8 /nobreak >nul
 
-echo [12/12] Verify...
+echo [12/13] Grant non-admin restart rights to deploy user...
+if exist "%APP_DIR%\deploy\windows\grant-equotation-restart-rights.ps1" (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%APP_DIR%\deploy\windows\grant-equotation-restart-rights.ps1" -ServiceName "%APP_NAME%"
+  if errorlevel 1 echo WARNING: restart-rights grant failed — hotfixes may still need Admin.
+) else if exist "%WORK_DIR%\deploy\windows\grant-equotation-restart-rights.ps1" (
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%WORK_DIR%\deploy\windows\grant-equotation-restart-rights.ps1" -ServiceName "%APP_NAME%"
+  if errorlevel 1 echo WARNING: restart-rights grant failed — hotfixes may still need Admin.
+) else (
+  echo WARNING: grant-equotation-restart-rights.ps1 not in deploy tree — skip ACL grant.
+)
+
+echo [13/13] Verify...
 echo.
 echo ========== VERIFY ==========
 nssm status "%APP_NAME%"
@@ -316,6 +330,7 @@ echo.
 echo Browser:  http://127.0.0.1:%FLASK_PORT%/
 echo API docs: http://127.0.0.1:%FLASK_PORT%/eq-sql-api/docs
 echo Logs:     %APP_DIR%\service-error.log
+echo Hotfix:  %APP_DIR%\deploy\windows\restart-equotation.cmd ^(no Admin after grant^)
 echo.
 start "" "http://127.0.0.1:%FLASK_PORT%/"
 echo Done. Press any key to close.
