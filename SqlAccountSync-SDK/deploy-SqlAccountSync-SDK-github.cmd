@@ -118,10 +118,10 @@ copy /Y "%ENV_PREP%" "C:\Temp\SqlAccountSync-SDK.env.backup" >nul
 
 echo.
 echo ========== STEP 0b / Windows user for scheduled task ==========
-echo SQL Account COM must run as a real logged-on user ^(not LocalSystem^).
-set "TASK_USER=%USERNAME%"
-set /p "TASK_USER=Windows username for At log on task [%TASK_USER%]: "
-if "%TASK_USER%"=="" set "TASK_USER=%USERNAME%"
+echo Using the Windows account that launched this elevated deploy ^(no typing needed^).
+echo Do NOT use SQL Account ADMIN / email addresses — those are not Windows SIDs.
+set "TASK_USER=%USERDOMAIN%\%USERNAME%"
+if /I "%USERDOMAIN%"=="%COMPUTERNAME%" set "TASK_USER=%USERNAME%"
 echo Using task user: %TASK_USER%
 echo.
 
