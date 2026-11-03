@@ -25,6 +25,14 @@ foreach ($k in $need) {
     }
 }
 
+# Soft length checks so empty placeholders fail before publish
+if ($map.ContainsKey('AWS_ACCESS_KEY_ID') -and -not [string]::IsNullOrWhiteSpace($map['AWS_ACCESS_KEY_ID']) -and $map['AWS_ACCESS_KEY_ID'].Length -lt 16) {
+    $bad += 'AWS_ACCESS_KEY_ID(too short)'
+}
+if ($map.ContainsKey('AWS_SECRET_ACCESS_KEY') -and -not [string]::IsNullOrWhiteSpace($map['AWS_SECRET_ACCESS_KEY']) -and $map['AWS_SECRET_ACCESS_KEY'].Length -lt 20) {
+    $bad += 'AWS_SECRET_ACCESS_KEY(too short)'
+}
+
 $tenantApiUrl = ''
 if ($map.ContainsKey('TENANT_BOOTSTRAP_API_URL') -and -not [string]::IsNullOrWhiteSpace($map['TENANT_BOOTSTRAP_API_URL'])) {
     $tenantApiUrl = $map['TENANT_BOOTSTRAP_API_URL'].Trim()

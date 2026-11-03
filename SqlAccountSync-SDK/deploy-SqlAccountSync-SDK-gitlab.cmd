@@ -9,7 +9,7 @@ REM
 REM Runs as a Scheduled Task at user logon (NOT LocalSystem service) so SQL
 REM Account COM / SQLAcc.BizApp works reliably.
 REM
-REM Required .env keys:
+REM Required .env keys (runtime AWS auth = access keys below; no aws login):
 REM   TENANT_CODE
 REM   TENANT_BOOTSTRAP_API_URL
 REM   AWS_REGION
@@ -17,6 +17,7 @@ REM   AWS_ACCESS_KEY_ID
 REM   AWS_SECRET_ACCESS_KEY
 REM Optional:
 REM   SDK_SECRET_ID=proacc/tenant/{TENANT}/sdkConnections
+REM   APP_MODE=dev|prod
 REM =============================================================================
 
 set "APP_NAME=SqlAccountSync"
@@ -75,6 +76,7 @@ echo   AWS_ACCESS_KEY_ID=...
 echo   AWS_SECRET_ACCESS_KEY=...
 echo   SDK_SECRET_ID=proacc/tenant/YOUR_TENANT/sdkConnections
 echo   ASPNETCORE_URLS=http://0.0.0.0:%HTTP_PORT%
+echo   APP_MODE=dev   ^(show OTP on login^)  or  APP_MODE=prod  ^(email OTP only^)
 echo.
 
 if exist "%APP_DIR%\.env" (
@@ -93,6 +95,7 @@ if exist "%APP_DIR%\.env" (
     echo AWS_SECRET_ACCESS_KEY=
     echo SDK_SECRET_ID=
     echo ASPNETCORE_URLS=http://0.0.0.0:5030
+    echo APP_MODE=dev
     echo.
     echo # Optional central Firebird control DB
     echo # CentralDb__Path=C:/SQLData/SqlAccountSync/SYNC.FDB
@@ -133,23 +136,7 @@ if errorlevel 1 (
   goto :fail
 )
 echo COM ProgID SQLAcc.BizApp: OK
-
-where aws >nul 2>&1
-if not errorlevel 1 (
-  aws sts get-caller-identity >nul 2>&1
-  if errorlevel 1 (
-    echo AWS session expired or missing. Starting aws login...
-    aws login
-    if errorlevel 1 (
-      echo ERROR: aws login failed. Fix AWS auth then retry.
-      goto :fail
-    )
-  ) else (
-    echo AWS identity: OK
-  )
-) else (
-  echo WARNING: aws CLI not in PATH. App will use .env access keys at runtime.
-)
+echo AWS: using AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY from .env ^(no aws login^)
 
 where git >nul 2>&1
 if errorlevel 1 (
