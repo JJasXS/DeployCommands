@@ -104,6 +104,15 @@ if exist "%APP_DIR%\.env" (
   echo Prefill: new template created
 )
 
+REM Existing .env copies won't have new keys — append APP_MODE if missing
+findstr /B /I /C:"APP_MODE=" "%ENV_PREP%" >nul 2>&1
+if errorlevel 1 (
+  echo.>> "%ENV_PREP%"
+  echo # Login OTP: APP_MODE=dev shows code on page; prod = email only>> "%ENV_PREP%"
+  echo APP_MODE=dev>> "%ENV_PREP%"
+  echo Added missing APP_MODE=dev to .env prefill
+)
+
 notepad "%ENV_PREP%"
 
 set "ENV_VALIDATOR=%~dp0validate-env.ps1"

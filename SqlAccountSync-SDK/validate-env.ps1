@@ -17,11 +17,18 @@ Get-Content -LiteralPath $EnvPath | ForEach-Object {
     }
 }
 
-$need = @('TENANT_CODE', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY')
+$need = @('TENANT_CODE', 'AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'APP_MODE')
 $bad = @()
 foreach ($k in $need) {
     if (-not $map.ContainsKey($k) -or [string]::IsNullOrWhiteSpace($map[$k])) {
         $bad += $k
+    }
+}
+
+if ($map.ContainsKey('APP_MODE') -and -not [string]::IsNullOrWhiteSpace($map['APP_MODE'])) {
+    $mode = $map['APP_MODE'].Trim().ToLowerInvariant()
+    if ($mode -ne 'dev' -and $mode -ne 'prod') {
+        $bad += 'APP_MODE(must be dev or prod)'
     }
 }
 
@@ -48,7 +55,7 @@ if ($bad.Count -gt 0) {
     exit 3
 }
 
-Write-Host ("OK: TENANT_CODE=" + $map['TENANT_CODE'] + "  SDK mode  AWS_REGION=" + $map['AWS_REGION'])
+Write-Host ("OK: TENANT_CODE=" + $map['TENANT_CODE'] + "  APP_MODE=" + $map['APP_MODE'] + "  AWS_REGION=" + $map['AWS_REGION'])
 if ($map.ContainsKey('SDK_SECRET_ID') -and -not [string]::IsNullOrWhiteSpace($map['SDK_SECRET_ID'])) {
     Write-Host ("OK: SDK_SECRET_ID=" + $map['SDK_SECRET_ID'])
 } else {
