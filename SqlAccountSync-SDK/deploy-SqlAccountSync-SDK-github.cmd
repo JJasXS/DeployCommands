@@ -24,7 +24,7 @@ set "APP_NAME=SqlAccountSync"
 set "TASK_NAME=SqlAccountSync-SDK"
 set "EXE_NAME=SqlAccountSync.exe"
 set "REPO_URL=https://github.com/JJasXS/multiDBSync.git"
-set "GIT_BRANCH=sdk-conversion"
+set "GIT_BRANCH=sdk-jason.vers"
 set "CSPROJ=src\SqlAccountSync\SqlAccountSync.csproj"
 
 set "WORK_DIR=C:\Source\SqlAccountSync"
