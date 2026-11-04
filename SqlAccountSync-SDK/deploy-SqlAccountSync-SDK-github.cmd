@@ -188,18 +188,51 @@ for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":%HTTP_PORT%" ^| findstr LIS
 timeout /t 2 /nobreak >nul
 
 echo [3/10] Wipe old source / publish folders...
+taskkill /F /IM "%EXE_NAME%" >nul 2>&1
+taskkill /F /IM dotnet.exe >nul 2>&1
 if exist "%WORK_DIR%" rmdir /s /q "%WORK_DIR%"
-if exist "%APP_DIR%" rmdir /s /q "%APP_DIR%"
+if exist "%WORK_DIR%" (
+  echo   Source folder locked -- renaming aside...
+  for /f %%T in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMddHHmmss"') do set "ORPHAN_TS=%%T"
+  move "%WORK_DIR%" "%WORK_DIR%.orphan.!ORPHAN_TS!" >nul 2>&1
+)
+if exist "%APP_DIR%" (
+  if exist "%APP_DIR%\.env" copy /Y "%APP_DIR%\.env" "%ENV_BACKUP%" >nul
+  rmdir /s /q "%APP_DIR%"
+)
 timeout /t 1 /nobreak >nul
 if not exist "C:\Source" mkdir "C:\Source"
 if not exist "C:\Apps\SqlAccountSync" mkdir "C:\Apps\SqlAccountSync"
 if not exist "%APP_DIR%" mkdir "%APP_DIR%"
 
 echo [4/10] Clone GitHub branch %GIT_BRANCH%...
-git clone --depth 1 -b %GIT_BRANCH% "%REPO_URL%" "%WORK_DIR%"
-if errorlevel 1 (
-  echo ERROR: git clone failed. Push branch %GIT_BRANCH% to GitHub first.
-  goto :fail
+set "USE_EXISTING_SOURCE=0"
+if exist "%WORK_DIR%\.git" (
+  echo   Existing source still present -- fetch/reset %GIT_BRANCH%...
+  pushd "%WORK_DIR%"
+  git fetch --depth 1 origin "%GIT_BRANCH%"
+  if errorlevel 1 (
+    popd
+    echo ERROR: git fetch failed. Push branch %GIT_BRANCH% to GitHub first.
+    goto :fail
+  )
+  git checkout -B "%GIT_BRANCH%" "FETCH_HEAD"
+  if errorlevel 1 (
+    popd
+    echo ERROR: git checkout failed for %GIT_BRANCH%.
+    goto :fail
+  )
+  git reset --hard "FETCH_HEAD"
+  popd
+  set "USE_EXISTING_SOURCE=1"
+)
+if "!USE_EXISTING_SOURCE!"=="0" (
+  git clone --depth 1 -b %GIT_BRANCH% "%REPO_URL%" "%WORK_DIR%"
+  if errorlevel 1 (
+    echo ERROR: git clone failed. Close apps locking C:\Source\SqlAccountSync, then retry.
+    echo        Or push branch %GIT_BRANCH% to GitHub first.
+    goto :fail
+  )
 )
 if not exist "%WORK_DIR%\%CSPROJ%" (
   echo ERROR: clone missing %CSPROJ%
