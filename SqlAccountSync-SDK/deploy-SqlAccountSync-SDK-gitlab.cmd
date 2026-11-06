@@ -96,7 +96,9 @@ if exist "%APP_DIR%\.env" (
     echo SDK_SECRET_ID=
     echo ASPNETCORE_URLS=http://0.0.0.0:5030
     echo APP_MODE=dev
+    echo AllowedHosts=mdbsync.oneclickclouds.com;localhost;127.0.0.1
     echo.
+    echo # LAN IPs + PC name are auto-added to AllowedHosts at startup - do not hardcode 192.168.x.x
     echo # Optional central Firebird control DB
     echo # CentralDb__Path=C:/SQLData/SqlAccountSync/SYNC.FDB
     echo # CENTRAL_FB_MASTERKEY=masterkey
@@ -265,7 +267,12 @@ netstat -ano | findstr ":%HTTP_PORT%"
 echo.
 powershell -NoProfile -Command "try { (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:%HTTP_PORT%/health).Content } catch { $_.Exception.Message }"
 echo.
-echo Browser: http://127.0.0.1:%HTTP_PORT%/
+echo Browser (this PC): http://127.0.0.1:%HTTP_PORT%/
+echo.
+echo ========== LAN access (other PCs on same network) ==========
+powershell -NoProfile -Command "$port=%HTTP_PORT%; $ips = Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.PrefixOrigin -ne 'WellKnown' } | Select-Object -ExpandProperty IPAddress -Unique; if (-not $ips) { Write-Host '  (no LAN IPv4 found)' }; foreach ($ip in $ips) { Write-Host ('  Server IP : ' + $ip); Write-Host ('  LAN URL   : http://{0}:{1}/Login' -f $ip, $port) }; Write-Host ('  PC name   : ' + $env:COMPUTERNAME); Write-Host ('  Name URL  : http://{0}:{1}/Login' -f $env:COMPUTERNAME, $port)"
+echo Open Windows Firewall inbound TCP %HTTP_PORT% if other PCs cannot connect.
+echo.
 start "" "http://127.0.0.1:%HTTP_PORT%/"
 echo Done. Press any key to close.
 pause
