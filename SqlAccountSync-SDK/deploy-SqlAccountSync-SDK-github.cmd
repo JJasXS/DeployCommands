@@ -285,18 +285,7 @@ powershell -NoProfile -Command "$port=%HTTP_PORT%; $ips = Get-NetIPAddress -Addr
 echo.
 echo ========== Windows Firewall ==========
 powershell -NoProfile -Command "$port=%HTTP_PORT%; $ruleName='SqlAccountSync ' + $port; Get-NetFirewallProfile | ForEach-Object { $state = if ($_.Enabled) { 'ON' } else { 'OFF' }; Write-Host ('  ' + $_.Name + ' profile : Firewall ' + $state) }; $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $rule) { Write-Host ('  Port ' + $port + ' rule  : MISSING (LAN may be blocked if Firewall ON)') } else { $enabled = if ($rule.Enabled -eq 'True') { 'ENABLED' } else { 'DISABLED' }; Write-Host ('  Port ' + $port + ' rule  : ' + $enabled + ' (' + $rule.DisplayName + ')') }"
-echo.
-echo Turn OFF Windows Firewall Private profile for easier LAN access?
-echo   Y = Private firewall OFF ^(Domain/Public stay as-is^)
-echo   N = keep current firewall settings ^(recommended if port %HTTP_PORT% rule is ENABLED^)
-set "FW_OFF="
-set /p FW_OFF=Choice [Y/N]: 
-if /I "!FW_OFF!"=="Y" (
-  netsh advfirewall set privateprofile state off
-  echo Private profile : Firewall OFF
-) else (
-  echo Private profile : left unchanged
-)
+echo LAN works with Firewall ON when the port %HTTP_PORT% rule is ENABLED ^(rule is added earlier in this deploy^).
 echo.
 start "" "http://127.0.0.1:%HTTP_PORT%/"
 echo Done. Press any key to close.
