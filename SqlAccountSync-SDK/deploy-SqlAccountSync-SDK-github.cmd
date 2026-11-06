@@ -282,7 +282,21 @@ echo Browser (this PC): http://127.0.0.1:%HTTP_PORT%/
 echo.
 echo ========== LAN access (other PCs on same network) ==========
 powershell -NoProfile -Command "$port=%HTTP_PORT%; $ips = Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike '127.*' -and $_.PrefixOrigin -ne 'WellKnown' } | Select-Object -ExpandProperty IPAddress -Unique; if (-not $ips) { Write-Host '  (no LAN IPv4 found)' }; foreach ($ip in $ips) { Write-Host ('  Server IP : ' + $ip); Write-Host ('  LAN URL   : http://{0}:{1}/Login' -f $ip, $port) }; Write-Host ('  PC name   : ' + $env:COMPUTERNAME); Write-Host ('  Name URL  : http://{0}:{1}/Login' -f $env:COMPUTERNAME, $port)"
-echo Open Windows Firewall inbound TCP %HTTP_PORT% if other PCs cannot connect.
+echo.
+echo ========== Windows Firewall ==========
+powershell -NoProfile -Command "$port=%HTTP_PORT%; $ruleName='SqlAccountSync ' + $port; Get-NetFirewallProfile | ForEach-Object { $state = if ($_.Enabled) { 'ON' } else { 'OFF' }; Write-Host ('  ' + $_.Name + ' profile : Firewall ' + $state) }; $rule = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $rule) { Write-Host ('  Port ' + $port + ' rule  : MISSING (LAN may be blocked if Firewall ON)') } else { $enabled = if ($rule.Enabled -eq 'True') { 'ENABLED' } else { 'DISABLED' }; Write-Host ('  Port ' + $port + ' rule  : ' + $enabled + ' (' + $rule.DisplayName + ')') }"
+echo.
+echo Turn OFF Windows Firewall Private profile for easier LAN access?
+echo   Y = Private firewall OFF ^(Domain/Public stay as-is^)
+echo   N = keep current firewall settings ^(recommended if port %HTTP_PORT% rule is ENABLED^)
+set "FW_OFF="
+set /p FW_OFF=Choice [Y/N]: 
+if /I "!FW_OFF!"=="Y" (
+  netsh advfirewall set privateprofile state off
+  echo Private profile : Firewall OFF
+) else (
+  echo Private profile : left unchanged
+)
 echo.
 start "" "http://127.0.0.1:%HTTP_PORT%/"
 echo Done. Press any key to close.
