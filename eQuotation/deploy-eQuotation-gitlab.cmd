@@ -107,7 +107,7 @@ if exist "%APP_DIR%\.env" (
     echo DB_USER=sysdba
     echo DB_PASSWORD=masterkey
     echo.
-    echo # SQL Account COM SDK writes
+    echo # SQL Account COM SDK flags — login from SM proacc/tenant/{TENANT}/sdkConnections
     echo SQL_ACCOUNTING_WRITE_PROVIDER=Sdk
     echo SQL_ACCOUNTING_QUOTATION_WRITE_PROVIDER=Sdk
     echo SQL_ACCOUNTING_PR_WRITE_PROVIDER=Sdk
@@ -117,10 +117,6 @@ if exist "%APP_DIR%\.env" (
     echo SQLACC_SDK_PR_CUD_ENABLED=true
     echo SQLACC_SDK_ALLOW_LIVE_COM=true
     echo SQLACC_COM_PROG_ID=SQLAcc.BizApp
-    echo SQLACC_SDK_DCF_PATH=\\SERVER\Share\SQLACC.DCF
-    echo # SQLACC_SDK_DATABASE_FILE=  ^(optional; defaults to Dynamo DB_PATH basename^)
-    echo SQLACC_SDK_USER=ADMIN
-    echo SQLACC_SDK_PASSWORD=
     echo SQLACC_SDK_LOGOUT_AFTER_USE=true
     echo SQLACC_SDK_SESSION_IDLE_SECONDS=300
   ) > "%ENV_PREP%"
