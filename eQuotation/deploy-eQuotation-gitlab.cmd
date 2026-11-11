@@ -103,9 +103,7 @@ if exist "%APP_DIR%\.env" (
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
     echo.
-    echo # Firebird master reads
-    echo DB_PATH=C:/eStream/SQLAccounting/DB/ACC-XXXX.FDB
-    echo DB_HOST=localhost
+    echo # Firebird credentials only — DB_PATH/DB_HOST come from Dynamo via TENANT_CODE
     echo DB_USER=sysdba
     echo DB_PASSWORD=masterkey
     echo.
@@ -117,12 +115,10 @@ if exist "%APP_DIR%\.env" (
     echo SQL_ACCOUNTING_MASTER_READ_PROVIDER=Firebird
     echo SQLACC_SDK_QUOTATION_CUD_ENABLED=true
     echo SQLACC_SDK_PR_CUD_ENABLED=true
-    echo SQL_ACCOUNTING_PR_AWARD_SYNC_MODE=LocalOnly
-    echo SQL_ACCOUNTING_PR_AWARD_LOCAL_ONLY_DATABASE=ACC-XXXX.FDB
     echo SQLACC_SDK_ALLOW_LIVE_COM=true
     echo SQLACC_COM_PROG_ID=SQLAcc.BizApp
     echo SQLACC_SDK_DCF_PATH=\\SERVER\Share\SQLACC.DCF
-    echo SQLACC_SDK_DATABASE_FILE=ACC-XXXX.FDB
+    echo # SQLACC_SDK_DATABASE_FILE=  ^(optional; defaults to Dynamo DB_PATH basename^)
     echo SQLACC_SDK_USER=ADMIN
     echo SQLACC_SDK_PASSWORD=
     echo SQLACC_SDK_LOGOUT_AFTER_USE=true
