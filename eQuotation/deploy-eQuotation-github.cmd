@@ -79,8 +79,9 @@ echo   TENANT_BOOTSTRAP_API_URL=https://...execute-api.../proacc-tenant-config-a
 echo   AWS_REGION=ap-southeast-1
 echo   AWS_ACCESS_KEY_ID=...
 echo   AWS_SECRET_ACCESS_KEY=...
+echo   SQLACC_SDK_* + WRITE_PROVIDER=Sdk  (local COM; set SQLACC_SDK_PASSWORD)
 echo.
-echo Tip: AWS keys are usually the same for every client; only TENANT_CODE changes.
+echo Tip: AWS keys are usually the same for every client; only TENANT_CODE / company FDB change.
 echo.
 
 if exist "%APP_DIR%\.env" (
@@ -94,12 +95,37 @@ if exist "%APP_DIR%\.env" (
   echo Prefill: copied from C:\Temp\eQuotation.env.backup
 ) else (
   (
-    echo # ProAcc eQuotation - tenant API URL no longer defaults in appsettings.json
+    echo # ProAcc eQuotation - tenant + AWS + local SDK ^(off paid REST^)
     echo TENANT_CODE=
     echo TENANT_BOOTSTRAP_API_URL=
     echo AWS_REGION=ap-southeast-1
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
+    echo.
+    echo # Firebird master reads
+    echo DB_PATH=C:/eStream/SQLAccounting/DB/ACC-XXXX.FDB
+    echo DB_HOST=localhost
+    echo DB_USER=sysdba
+    echo DB_PASSWORD=masterkey
+    echo.
+    echo # SQL Account COM SDK writes
+    echo SQL_ACCOUNTING_WRITE_PROVIDER=Sdk
+    echo SQL_ACCOUNTING_QUOTATION_WRITE_PROVIDER=Sdk
+    echo SQL_ACCOUNTING_PR_WRITE_PROVIDER=Sdk
+    echo SQL_ACCOUNTING_BLOCK_REST_HTTP=true
+    echo SQL_ACCOUNTING_MASTER_READ_PROVIDER=Firebird
+    echo SQLACC_SDK_QUOTATION_CUD_ENABLED=true
+    echo SQLACC_SDK_PR_CUD_ENABLED=true
+    echo SQL_ACCOUNTING_PR_AWARD_SYNC_MODE=LocalOnly
+    echo SQL_ACCOUNTING_PR_AWARD_LOCAL_ONLY_DATABASE=ACC-XXXX.FDB
+    echo SQLACC_SDK_ALLOW_LIVE_COM=true
+    echo SQLACC_COM_PROG_ID=SQLAcc.BizApp
+    echo SQLACC_SDK_DCF_PATH=\\SERVER\Share\SQLACC.DCF
+    echo SQLACC_SDK_DATABASE_FILE=ACC-XXXX.FDB
+    echo SQLACC_SDK_USER=ADMIN
+    echo SQLACC_SDK_PASSWORD=
+    echo SQLACC_SDK_LOGOUT_AFTER_USE=true
+    echo SQLACC_SDK_SESSION_IDLE_SECONDS=300
   ) > "%ENV_PREP%"
   echo Prefill: new template created
 )
