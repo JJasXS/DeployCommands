@@ -102,11 +102,10 @@ if exist "%APP_DIR%\.env" (
     echo AWS_ACCESS_KEY_ID=
     echo AWS_SECRET_ACCESS_KEY=
     echo.
-    echo # Firebird credentials only — DB_PATH/DB_HOST come from Dynamo via TENANT_CODE
-    echo DB_USER=sysdba
-    echo DB_PASSWORD=masterkey
+    echo # Firebird path/user/password: Dynamo database.* + dbPasswordSecretRef ^(not .env^)
+    echo # SDK login: SM proacc/tenant/{TENANT}/sdkConnections
     echo.
-    echo # SQL Account COM SDK flags — login from SM proacc/tenant/{TENANT}/sdkConnections
+    echo # SQL Account COM SDK feature flags
     echo SQL_ACCOUNTING_WRITE_PROVIDER=Sdk
     echo SQL_ACCOUNTING_QUOTATION_WRITE_PROVIDER=Sdk
     echo SQL_ACCOUNTING_PR_WRITE_PROVIDER=Sdk
@@ -115,9 +114,6 @@ if exist "%APP_DIR%\.env" (
     echo SQLACC_SDK_QUOTATION_CUD_ENABLED=true
     echo SQLACC_SDK_PR_CUD_ENABLED=true
     echo SQLACC_SDK_ALLOW_LIVE_COM=true
-    echo SQLACC_COM_PROG_ID=SQLAcc.BizApp
-    echo SQLACC_SDK_LOGOUT_AFTER_USE=true
-    echo SQLACC_SDK_SESSION_IDLE_SECONDS=300
   ) > "%ENV_PREP%"
   echo Prefill: new template created
 )
